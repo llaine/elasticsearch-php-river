@@ -1,5 +1,7 @@
 <?php
 
+namespace ElasticRiver;
+
 
 /**
  * Interface LoaderInterface

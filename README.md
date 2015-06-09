@@ -13,19 +13,18 @@ $ php composer.phar install
 ```php
 <?php
 
+/* import composer dependencies */
+require_once "vendor/autoloader.php";
 
+/* ElasticRiver dependecies */
 require_once "src/autoloader.php";
 
 try {
 
-    /* Create the elasticsearch importer */
-    $importer = new ElasticaImporter(
-        array("number_of_shard" => 5)
-    );
+    $importer = new \ElasticRiver\ElasticaImporter();
 
-    /* create the mysql loader */
-    $loader = new MySqlLoader(
-        "database",
+    $loader = new \ElasticRiver\MySqlLoader(
+        "bew_abo_ulokdb",
         array(
             "host" => "localhost",
             "login" => "root",
@@ -33,11 +32,9 @@ try {
         )
     );
 
-    /* River query */
-    $query = "SELECT * FROM Articles;";
+    $river = new \ElasticRiver\River($importer, $loader);
 
-    /* Create the river using the importer and loader. */
-    $river = new River($importer, $loader, $query);
+    $river->setQuery("SELECT * FROM Articles");
 
     /* send the river, will create a new index and type */
     $river->send("index", "type");
@@ -46,9 +43,11 @@ try {
 } catch(Exception $e) {
     echo ($e->getMessage());
 }
-
-
-
-
-
 ```
+
+
+## Requirements
+
+- Elasticsearch
+- >= php 5.3
+- memory limit : According to the number of row you might import using bulk, you should increase the memomry limit of your php config file.

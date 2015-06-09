@@ -1,13 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: louis
- * Date: 05/06/15
- * Time: 11:49
- */
+
+namespace ElasticRiver;
+
 
 require_once "interface/ImporterInterface.php";
 require_once "exception/Exceptions.php";
+require_once "utils/ElasticUtils.php";
 
 
 /**
@@ -24,18 +22,18 @@ class ElasticaImporter implements ImporterInterface {
     private $clientElastic;
 
     /**
-     * @var Elastica\Index
+     * @var \Elastica\Index
      */
     private $currentIndex;
 
     /**
-     * @var Elastica\Type
+     * @var \Elastica\Type
      */
     private $currentType;
 
 
     /**
-     * Connect to Elasticsearch using the Elastica\Client
+     * Connect to Elasticsearch using the \Elastica\Client
      * @param array $params
      * @param null $callback
      */
@@ -48,7 +46,7 @@ class ElasticaImporter implements ImporterInterface {
 
         $config = array_merge($config, $params);
 
-        $this->clientElastic = new Elastica\Client($config, $callback);
+        $this->clientElastic = new \Elastica\Client($config, $callback);
     }
 
     /**
@@ -57,14 +55,14 @@ class ElasticaImporter implements ImporterInterface {
      * Create an elasticsearch index
      * @param $name
      * @param array $opts
-     * @throws ImporterException
+     * @throws \ImporterException
      * @return mixed
      */
     public function createDatabase($name, array $opts = null)
     {
 
         if(!isset($this->clientElastic)) {
-            throw new ImporterException("clientElastic non définie lors d'une tentative de créer un index. ", 404);
+            throw new \ImporterException("clientElastic non définie lors d'une tentative de créer un index. ", 404);
         }
 
         $index = $this->clientElastic->getIndex($name);
@@ -97,10 +95,10 @@ class ElasticaImporter implements ImporterInterface {
         $index = $this->currentIndex;
 
         if(!isset($index)) {
-            throw new ImporterException('Client $elastic non définie lors d\une tentative de créer un type ', 404);
+            throw new \ImporterException('Client $elastic non définie lors d\une tentative de créer un type ', 404);
         }
 
-        $type = new Elastica\Type($this->currentIndex, $name);
+        $type = new \Elastica\Type($this->currentIndex, $name);
 
         if(isset($opts['mapping'])){
             $type->setMapping($opts['mapping']);
@@ -133,7 +131,7 @@ class ElasticaImporter implements ImporterInterface {
      * Useful for creating large amount of records.
      * Must create records using the bulk system.
      * @param array $data
-     * @throws ImporterException
+     * @throws \ImporterException
      * @return boolean
      */
     public function createRecordsWithBulk(array $data)
@@ -141,10 +139,10 @@ class ElasticaImporter implements ImporterInterface {
         $errors = array_filter($data);
 
         if(empty($errors)) {
-            throw new ImporterException('Tableau de donnée vide lors d\'une tentative de Bulk sur l\'index '.$this->currentIndex.' et le type '.$this->currentType);
+            throw new \ImporterException('Tableau de donnée vide lors d\'une tentative de Bulk sur l\'index '.$this->currentIndex.' et le type '.$this->currentType);
         }
 
-        $bulk = new Elastica\Bulk($this->clientElastic);
+        $bulk = new \Elastica\Bulk($this->clientElastic);
 
         $bulk->setType($this->currentType);
 
@@ -163,17 +161,17 @@ class ElasticaImporter implements ImporterInterface {
      *
      * @param array $data
      * @throws ImporterException
-     * @return \Elastica\Document
+     * @return \\Elastica\Document
      */
     public function createDocument(array $data) {
 
         $errors = array_filter($data);
 
         if(empty($errors)) {
-            throw new ImporterException('Tableau de donnée vide lors d\'une tentative de création de document sur l\'index '.$this->currentIndex.' et le type '.$this->currentType);
+            throw new \ImporterException('Tableau de donnée vide lors d\'une tentative de création de document sur l\'index '.$this->currentIndex.' et le type '.$this->currentType);
         }
 
-        $document = new Elastica\Document();
+        $document = new \Elastica\Document();
 
         $document->setData($data);
 
@@ -187,42 +185,28 @@ class ElasticaImporter implements ImporterInterface {
      */
     public function testConnection()
     {
-        $connection = new \Elastica\Connection();
-
-        return $connection->isEnabled();
+        return $this->elasticUtils->testConnection();
     }
-
-
-    /**
-     * Helper function which provide a way to refresh the database (index, or collections, etc).
-     * @param $name
-     * @return mixed
-     */
-    public function refreshTable()
-    {
-        $this->currentIndex->refresh();
-    }
-
 
     /**
      * @return string Host to es for elastica tests
      */
     public function _getHost()
     {
-        return getenv('ES_HOST') ?: Elastica\Connection::DEFAULT_HOST;
+        return getenv('ES_HOST') ?: \Elastica\Connection::DEFAULT_HOST;
     }
 
     /**
-     * @return int Port to es for elastica tests
+     * @return int Port to es for \Elastica tests
      */
     public function _getPort()
     {
-        return getenv('ES_PORT') ?: Elastica\Connection::DEFAULT_PORT;
+        return getenv('ES_PORT') ?: \Elastica\Connection::DEFAULT_PORT;
     }
 
 
     /**
-     * @return Elastica\Client
+     * @return \Elastica\Client
      */
     public function getClientElastic()
     {
@@ -230,7 +214,7 @@ class ElasticaImporter implements ImporterInterface {
     }
 
     /**
-     * @return Elastica\Index
+     * @return \Elastica\Index
      */
     public function getCurrentIndex()
     {
@@ -238,14 +222,35 @@ class ElasticaImporter implements ImporterInterface {
     }
 
     /**
-     * @return Elastica\Type
+     * @return \Elastica\Type
      */
     public function getCurrentType()
     {
         return $this->currentType;
     }
 
+    /**
+     * @param \Elastica\Client $clientElastic
+     */
+    public function setClientElastic($clientElastic)
+    {
+        $this->clientElastic = $clientElastic;
+    }
 
+    /**
+     * @param \Elastica\Index $currentIndex
+     */
+    public function setCurrentIndex($currentIndex)
+    {
+        $this->currentIndex = $currentIndex;
+    }
 
+    /**
+     * @param \Elastica\Type $currentType
+     */
+    public function setCurrentType($currentType)
+    {
+        $this->currentType = $currentType;
+    }
 
 }

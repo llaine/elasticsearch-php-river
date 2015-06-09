@@ -1,6 +1,9 @@
 <?php
 
 
+namespace ElasticRiver;
+
+
 require_once "interface/LoaderInterface.php";
 require_once "exception/Exceptions.php";
 
@@ -47,7 +50,7 @@ class MySqlLoader implements LoaderInterface {
      */
     public function connect()
     {
-        $this->instance = new PDO('mysql:host='.$this->credentials['host'].';dbname='.$this->database.';charset=utf8', $this->credentials['login'], $this->credentials['password']);
+        $this->instance = new \PDO('mysql:host='.$this->credentials['host'].';dbname='.$this->database.';charset=utf8', $this->credentials['login'], $this->credentials['password']);
     }
 
     /**
@@ -61,7 +64,7 @@ class MySqlLoader implements LoaderInterface {
 
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -91,5 +94,27 @@ class MySqlLoader implements LoaderInterface {
         return $this->database;
     }
 
+    /**
+     * @param \PDO $instance
+     */
+    public function setInstance($instance)
+    {
+        $this->instance = $instance;
+    }
 
+    /**
+     * @param array $credentials
+     */
+    public function setCredentials($credentials)
+    {
+        $this->credentials = $credentials;
+    }
+
+    /**
+     * @param string $database
+     */
+    public function setDatabase($database)
+    {
+        $this->database = $database;
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+namespace ElasticRiver;
 
 
 require_once "interface/ImporterInterface.php";
@@ -48,14 +49,15 @@ class River {
      *
      * @param $indexName
      * @param $typeName
-     * @throws Exception
+     * @throws \Exception
      */
     public function send($indexName, $typeName) {
+
 
         $this->loader->connect();
 
         if(!$this->importer->testConnection()) {
-            throw new RiverException("Tentative de connection à l'importer échoué lors de l'envoie d'un bulk", 500);
+            throw new \RiverException("Tentative de connection à l'importer échoué lors de l'envoie d'un bulk", 500);
         }
 
         $this->importer->createDatabase($indexName);
@@ -75,7 +77,56 @@ class River {
 
         $this->importer->createRecordsWithBulk($documents);
 
-        $this->importer->refreshTable();
-
     }
+
+    /**
+     * @return LoaderInterface
+     */
+    public function getLoader()
+    {
+        return $this->loader;
+    }
+
+    /**
+     * @param LoaderInterface $loader
+     */
+    public function setLoader($loader)
+    {
+        $this->loader = $loader;
+    }
+
+    /**
+     * @return ImporterInterface
+     */
+    public function getImporter()
+    {
+        return $this->importer;
+    }
+
+    /**
+     * @param ImporterInterface $importer
+     */
+    public function setImporter($importer)
+    {
+        $this->importer = $importer;
+    }
+
+    /**
+     * @return string
+     */
+    public function getQuery()
+    {
+        return $this->query;
+    }
+
+    /**
+     * @param string $query
+     */
+    public function setQuery($query)
+    {
+        $this->query = $query;
+    }
+
+
+
 }
