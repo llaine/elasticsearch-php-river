@@ -24,7 +24,7 @@ try {
     $importer = new \ElasticRiver\ElasticaImporter();
 
     $loader = new \ElasticRiver\MySqlLoader(
-        "bew_abo_ulokdb",
+        "mysql_database",
         array(
             "host" => "localhost",
             "login" => "root",
